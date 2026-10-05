@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-04T01:38:10+0530",
+  "source": "Development image; not classroom accuracy assessment",
+  "httpServer": "uvicorn on loopback",
+  "model": "Prepared YOLO-World local artifact",
+  "submitted": 5,
+  "observed": 2,
+  "mismatch": "review",
+  "reviewPersisted": true,
+  "adminCsvExport": true,
+  "incomingAssignmentEnforced": true,
+  "outboxReopened": true,
+  "edgeEventBodyBytes": 338,
+  "edgeAcknowledged": 1,
+  "edgeDuplicateAcknowledged": true,
+  "evidenceImageCount": 1,
+  "modelReady": true,
+  "runtime": "/var/folders/lq/hhcyg4wn1wd0dpr76854gnb80000gn/T/cw-real-http-ofbrrctz"
+}

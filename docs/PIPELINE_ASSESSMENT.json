@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "created_at": "2026-10-03T22:53:09.697472+00:00",
+  "status": "complete",
+  "dataset": {
+    "videos": 1,
+    "observations": 3,
+    "scenes": 1,
+    "splits": [
+      "unassigned"
+    ],
+    "has_held_out_test": false
+  },
+  "settings": {
+    "attendance_tolerance": 0,
+    "iou_threshold": 0.5
+  },
+  "metrics": {
+    "count": {
+      "countMAE": 0.0,
+      "countRMSE": 0.0,
+      "overcount_total": 0,
+      "undercount_total": 0,
+      "overcount_observations": 0,
+      "undercount_observations": 0,
+      "scored_observations": 3,
+      "total_observations": 3,
+      "coverage": 1.0
+    },
+    "attendance_alerts": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "unverified_positive": 0,
+      "unverified_negative": 0,
+      "unknown_ground_truth": 0,
+      "precision": 1.0,
+      "recall_on_assessed": 1.0,
+      "recall_including_unverified": 1.0,
+      "assessed": 3,
+      "total": 3,
+      "assessment_coverage": 1.0
+    },
+    "infrastructure_alerts": {
+      "chair": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "unverified_positive": 0,
+        "unverified_negative": 0,
+        "unknown_ground_truth": 0,
+        "precision": 1.0,
+        "recall_on_assessed": 1.0,
+        "recall_including_unverified": 1.0,
+        "assessed": 3,
+        "total": 3,
+        "assessment_coverage": 1.0
+      }
+    },
+    "object_detection": {
+      "available": false,
+      "iou_threshold": 0.5,
+      "labelled_frames": 0,
+      "scored_frames": 0,
+      "unscored_frames": 0,
+      "coverage": null,
+      "classes": {},
+      "note": "Object FP/FN requires exhaustive boxes; count under/overestimates are not object FP/FN."
+    }
+  },
+  "by_split": {
+    "unassigned": {
+      "count": {
+        "countMAE": 0.0,
+        "countRMSE": 0.0,
+        "overcount_total": 0,
+        "undercount_total": 0,
+        "overcount_observations": 0,
+        "undercount_observations": 0,
+        "scored_observations": 3,
+        "total_observations": 3,
+        "coverage": 1.0
+      },
+      "attendance_alerts": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "unverified_positive": 0,
+        "unverified_negative": 0,
+        "unknown_ground_truth": 0,
+        "precision": 1.0,
+        "recall_on_assessed": 1.0,
+        "recall_including_unverified": 1.0,
+        "assessed": 3,
+        "total": 3,
+        "assessment_coverage": 1.0
+      },
+      "infrastructure_alerts": {
+        "chair": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0,
+          "unverified_positive": 0,
+          "unverified_negative": 0,
+          "unknown_ground_truth": 0,
+          "precision": 1.0,
+          "recall_on_assessed": 1.0,
+          "recall_including_unverified": 1.0,
+          "assessed": 3,
+          "total": 3,
+          "assessment_coverage": 1.0
+        }
+      },
+      "object_detection": {
+        "available": false,
+        "iou_threshold": 0.5,
+        "labelled_frames": 0,
+        "scored_frames": 0,
+        "unscored_frames": 0,
+        "coverage": null,
+        "classes": {},
+        "note": "Object FP/FN requires exhaustive boxes; count under/overestimates are not object FP/FN."
+      }
+    }
+  },
+  "coverage": {
+    "total": 3,
+    "usable_predictions": 3,
+    "abstained_or_missing": 0,
+    "unknown_ground_truth": 0
+  },
+  "model_metadata": [
+    {
+      "model": "YOLO-World yolov8s-worldv2 (prepared offline vocabulary)"
+    }
+  ],
+  "limitations": [
+    "Results apply only to the supplied labelled footage.",
+    "Snapshot alert metrics do not measure sustained-alert delay or alerts per camera-hour.",
+    "All unknown and abstained observations remain in coverage; recall including unverified shows operational missed coverage.",
+    "The declared split and exhaustive annotations must be independently reviewed; the software cannot verify label quality.",
+    "No bounding-box annotations means object-level false-positive/false-negative metrics are unavailable."
+  ],
+  "files": [
+    "report.json",
+    "predictions.json",
+    "predictions.csv",
+    "manifest.json"
+  ],
+  "demonstration_context": "Public two-person image rendered as a short timestamped pipeline fixture. One scene, three positive mismatch samples, no bounding-box labels. This does not measure classroom accuracy or specificity."
+}

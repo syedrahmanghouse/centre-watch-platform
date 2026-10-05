@@ -1,0 +1,16 @@
+.git
+.openai
+.sites-runtime
+.sites-checkout
+dist
+platform/.venv
+platform/runtime*
+platform/models
+data/incoming/*
+data/results/*
+data/annotations/*
+!data/annotations/manifest.example.json
+**/__pycache__
+**/.pytest_cache
+**/*.log
+**/.edge

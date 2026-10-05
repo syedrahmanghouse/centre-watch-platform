@@ -3,3 +3,16 @@ node_modules/
 *.log
 .sites-runtime/
 .sites-checkout/
+platform/.venv/
+platform/runtime*/
+platform/models/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+.edge/
+data/incoming/*
+!data/incoming/README.txt
+data/annotations/*
+!data/annotations/manifest.example.json
+data/results/*

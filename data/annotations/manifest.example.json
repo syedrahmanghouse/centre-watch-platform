@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "videos": [
+    {
+      "file": "chennai_room01_session01.mp4",
+      "room": "Room 01",
+      "reported_count": 25,
+      "inventory": [{"name": "chair", "quantity": 25}, {"name": "workbench", "quantity": 4}],
+      "observations": [
+        {"time_seconds": 10, "people": 23, "equipment": {"chair": 25, "workbench": 4}, "visibility": "clear"},
+        {"time_seconds": 40, "people": 23, "equipment": {"chair": 25, "workbench": 4}, "visibility": "clear"}
+      ]
+    }
+  ]
+}

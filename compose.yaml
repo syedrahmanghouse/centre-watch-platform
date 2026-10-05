@@ -1,0 +1,17 @@
+services:
+  centrewatch:
+    build:
+      context: .
+      dockerfile: platform/Dockerfile
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      TZ: Asia/Kolkata
+      CW_PUBLIC_ORIGIN: http://127.0.0.1:8787
+    volumes:
+      - records:/var/lib/centrewatch
+      - ./data/incoming:/data/incoming:ro
+      - ./platform/models:/models:ro
+    restart: unless-stopped
+volumes:
+  records:

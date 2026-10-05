@@ -1,51 +1,120 @@
-# CentreWatch prototype
+# CentreWatch
 
-A browser-local prototype for SIH 26245, with administrator, institution-head, and trainer workspaces.
+A working local monitoring platform for SIH problem statement 26245: attendance verification and infrastructure observations at training centres.
 
-## Run locally
+**Use `platform/` for the complete application.** The older `dist/` website is a separate browser-only demonstration. Its private hosted URL does not run the Python service described here.
+
+## Start on this machine
 
 ```sh
-npm start
+cd centre-watch/platform
+./run.sh
 ```
 
-Open `http://127.0.0.1:4173`. No dependency installation or build is required. `npm run check` checks the three JavaScript modules.
+Open **http://127.0.0.1:8787**. Create the first administrator account in the browser. There are no default credentials or automatic sample records. Dependencies and the prepared offline model have already been installed in this workspace.
 
-## Review the workflow
+On a fresh machine, install Python 3.12, then run `./install.sh` once with internet access. It creates an isolated virtual environment, installs the dependencies, prepares the separate person and inventory detectors, and tests them without network access. Subsequent application and inference runs use local assets. For an existing installation, run `.venv/bin/python scripts/prepare_people_model.py` from `platform/` to prepare the dedicated person detector.
 
-1. Start as **Institution head**. Add a trainer if needed, then create a class and upload a JPEG, PNG, WebP, MP4, or WebM file (maximum 75 MB).
-2. Switch the top-right role selector to **Trainer** and select the assigned trainer. Submit the classroom count.
-3. The count is stored immediately. Uploaded media runs experimental COCO-SSD person detection in the browser. Photos use one observation; videos use a median across at most seven sampled frames. This is a visible-person estimate, not a unique or identity-based attendance measure.
-4. Switch back to **Institution head** to review a mismatch or an unclear result. Record an acceptance note or request follow-up.
-5. Switch to **Administrator** for institution-level oversight and daily CSV reports.
+## Your CCTV videos go here
 
-The eight seeded classes use labelled sample observations and a classroom illustration. They are explicitly marked as samples. A seeded class's check replays a fixed sample count; it does not run inference on the illustration. Uploaded media never receives a simulated fallback result.
+```text
+data/incoming/
+```
 
-## Boundaries
+Absolute path on this machine:
 
-- Roles are prototype views, not authenticated or secure access controls.
-- Records use localStorage; uploads use IndexedDB. Data belongs to the current browser/origin and is not shared across users or devices.
-- First inference downloads TensorFlow.js, COCO-SSD, and model weights from their public hosting services. Images and videos are not uploaded by the app.
-- Confidence labels are review heuristics, not calibrated accuracy. Low-confidence and failed checks remain unverified.
-- Declared equipment is recorded, but this prototype does not verify equipment, machine operability, CCTV feeds, or PTZ control.
-- Reports are available on demand; there is no background email or end-of-day scheduler.
-- Closing the browser interrupts an active check. Reloaded interrupted checks become unverified and can be retried.
-- Sample/trainer input, previous submissions, and analysis/review history remain separate from model estimates. An aligned aggregate count cannot verify trainee identities.
+```text
+/Users/syedrahman/Desktop/SIH-Project/PostAI/centre-watch/data/incoming/
+```
 
-## Files
+MP4 is recommended. MOV, AVI, MKV, WebM, JPG and PNG are also supported, subject to the file’s installed decoder. Use a separate file for each room/camera. Do not put credentials or trainee names in filenames.
 
-- `dist/app.js`: interface, role navigation, forms, attendance/review workflow, reports.
-- `dist/store.js`: sample records, persistence, and media storage.
-- `dist/vision.js`: actual browser inference, video sampling, quality flags, timeouts.
-- `dist/styles.css`: responsive dashboard styling.
+After copying files:
 
-## Model reference
+1. **Admin:** create an institution and its head account. In **System & cameras → Assign footage**, assign the incoming file to that institution.
+2. **Institution head:** create trainers, then create classes. Choose an assigned incoming file, upload a photo/video, or provide a live RTSP camera URL. Enter sanctioned equipment quantities and the class schedule.
+3. **Institution head:** choose the counting mode (default: **Seated people only**) and observation length (default: **300 seconds**, configurable to 900). Confirm inventory coverage only after checking the camera view. Optionally specify the trainee seating region to exclude the trainer’s area.
+4. **Trainer:** sign in and submit attendance for an assigned class. The server queues and runs actual local inference.
+5. **Institution head:** inspect mismatches, actual observation duration, seated/standing/posture uncertainty, infrastructure gaps and history; record an explanation or request follow-up. Live checks need actual capture time. Short uploads cover only their available duration and are labelled incomplete for a five-minute request.
+6. **Admin:** review daily institution/class reports and export CSV. Submitted and observed counts remain separate after review.
 
-Uses the official [TensorFlow.js COCO-SSD model](https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd). Libraries are pinned to TensorFlow.js 4.22.0 and COCO-SSD 2.2.3. Target classroom performance needs a separate labelled accuracy evaluation.
+Uploaded sources expire after 24 hours by default; annotated camera snapshots and legacy diagrams after 30 days. Snapshot retention is independent of source expiry. The administrator can change those periods. Incoming originals are never automatically deleted. Real footage, runtime databases, keys, model weights, annotations, and test environments are excluded from Git and container build contexts.
 
-## Verification performed
+## What is implemented
 
-- Browser walkthrough: create institution, create trainer, upload media and create class, switch to assigned trainer, submit attendance, review as institution head, inspect administrator report.
-- Actual JPEG smoke test using a public two-person sample: submitted 3, detected 2, review alert produced.
-- Actual four-second H.264 smoke test of the same image: three frames sampled, median count 2, submitted count 2 aligned. This validates video decoding and sampling, not performance on moving classroom footage.
-- Labelled sample class: submitted 24, seeded result 24, sample status and provenance displayed.
-- The smoke-test files and records are not part of the distributed seed dataset.
+| Outcome | Working implementation | Validation still needed |
+| --- | --- | --- |
+| Video analytics | OpenCV decoding; offline YOLO11m person detection with overlapping crops and duplicate removal; pretrained posture classification for seated-only counting; temporary spatial presence support through brief occlusions; separate YOLO-World inventory checks; requested/actual observation duration | Independent labelled centre footage, seated/standing posture labels, full five-minute recordings and a real camera field test |
+| Monitoring dashboards | Actual admin/head/trainer accounts, tenant-scoped access, classes, attendance, durable jobs, discrepancies, infrastructure observations, review history and CSV reports | User workflow review with actual institutions |
+| Privacy design | No facial identification; local inference; restricted camera snapshots with frame-local detection numbers; authenticated source/evidence access; retention and audit records; metadata-only edge sync | Site-specific operating policy and human consent/notice procedures |
+| Accuracy assessment | Ground-truth manifest runner, exact timestamp comparisons, count MAE/RMSE, alert TP/FP/FN/TN, abstention coverage, optional bounding-box detection metrics and exports | User clips + independent labels; no classroom accuracy percentage is claimed yet |
+| Low bandwidth | Offline model assets and UI, local SQLite, durable metadata outbox, reconnect retry and duplicate-safe receiver; continuous edge worker | Real rural connectivity, device throughput and camera coverage measurements |
+
+### Technical boundaries
+
+- Seated mode counts confirmed **seated people**, excludes standing people and requires review for uncertain posture. Posture does not identify students or trainers: a seated trainer can count and a standing student is excluded. All-visible-people mode remains available explicitly.
+- Each check requests 5–15 minutes, default 5. Uploaded video is analysed only for the available duration; a short recording or photo cannot demonstrate a completed five-minute observation. Live RTSP capture requires the requested wall-clock time.
+- A missing detection may be supported by recent seated evidence for at most **3 seconds**. A person who remains **visible and spatially stable** may separately use seated posture confirmed within **30 seconds** if the current posture is unclear; standing detections are excluded immediately. Posture-history use is shown in the frame table. The count is simultaneously supported presence, not the maximum count or every unique person seen across a clip. No face identification or cross-session person matching is performed.
+- The detectors and posture classifier use pretrained models with inference logic; they have not been newly trained to achieve perfect classroom accuracy. A matching aggregate count cannot establish who attended.
+- Supported equipment labels are recorded in `platform/models/vocabulary.json`. Unknown items stay unverified; extend and evaluate the vocabulary before claiming support.
+- An equipment detection does not establish operability. Idle machines are never labelled broken. Functional assessment needs an appropriate observable test or manual inspection.
+- Visibility confirmation is a human calibration step. Occlusion and out-of-frame areas can still hide people or equipment.
+- RTSP works with cameras/NVRs that expose compatible streams. Universal camera compatibility and automatic PTZ scanning are not claimed.
+- Periodic checks run on **live RTSP sources during scheduled class hours**, with jitter around the configured interval. Saved clips run on submission or manual verification.
+- The current deployment is a single application instance with a persistent SQLite database and a single durable inference worker. It is suitable for a working demonstration and an initial measured pilot; national-scale performance has not been measured.
+- Public hosting of the backend requires a host with Python/ML compute, persistent disk, TLS, and access to cameras or centre edge workers. The earlier static Site cannot execute this service.
+
+## Stack and source map
+
+| Layer | Implementation |
+| --- | --- |
+| Dashboard | Native ES modules, HTML/CSS, accessible forms, responsive layout; no CDN dependencies |
+| API / access | FastAPI, Pydantic, scrypt passwords, hashed server sessions, HttpOnly cookies, CSRF and origin checks |
+| Records / jobs | SQLite WAL, persistent work queue, versioned submissions, audit records |
+| Vision | Python, OpenCV, PyTorch, YOLO11m for people, pretrained posture classification and temporary spatial presence support, prepared YOLO-World vocabulary for inventory; local model assets |
+| Edge | Local detector + durable SQLite outbox, compact allowlisted metadata, backoff and event UUID deduplication |
+| Deployment | Isolated Python environment; optional Docker Compose; local files and mounted volumes |
+
+- `platform/server/`: API, access control, jobs, inference, evaluation.
+- `platform/web/`: authenticated dashboard.
+- `platform/scripts/`: model preparation, dataset evaluation, edge worker/sync and integration checks.
+- `platform/tests/`: meaningful access, data integrity, vision aggregation, evaluation and offline retry tests.
+- `platform/requirements.lock.txt`: versions installed for the verified macOS Python 3.12 environment. Fresh installs use the pinned top-level requirement files; other OS/GPU wheels may differ.
+- `docs/PRIVACY_DESIGN.md`: data identified, privacy boundaries, retention and access.
+- `docs/ACCURACY_PROTOCOL.md`: annotation format and metrics.
+- `docs/LOW_BANDWIDTH_DEPLOYMENT.md`: offline inference, continuous worker, metadata sync and measured transport smoke test.
+- `docs/INTEGRATION_READINESS.md`: verified backend flow and current boundaries.
+- `docs/CLASSROOM_COUNT_FIX.md`: classroom overcount diagnosis, detector changes, measured counts and validation limits.
+
+## Dataset evaluation
+
+Make a copy of `data/annotations/manifest.example.json`, replace the filenames and independently label the headcounts/equipment at its timestamps. Do not copy model predictions into ground truth. Keep development and test cameras/rooms separate.
+
+As administrator, open **Accuracy lab → Run evaluation** and upload that JSON manifest. Results and raw prediction exports appear when the job finishes. The video files remain in the intake directory; the manifest does not contain footage.
+
+CLI details and edge worker instructions are in their dedicated documents. Only use a reported score for the exact labelled dataset it describes.
+
+## Verification
+
+```sh
+cd centre-watch/platform
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pytest tests -q
+node --check web/app.js
+```
+
+The HTTP integration script uses an isolated temporary database and explicit source path. It never creates accounts in your application’s real database. Public-photo/video fixtures prove the pipeline works; they are not representative classroom accuracy evidence.
+
+## Container deployment
+
+Prepare model assets locally with `platform/install.sh`, then from `centre-watch/` run:
+
+```sh
+docker compose up --build
+```
+
+The container binds to loopback, persists records in a named volume, mounts incoming footage read-only, and mounts prepared models read-only. Docker execution has not been verified in this workspace. For a remote pilot, terminate HTTPS at a reverse proxy, set `CW_PUBLIC_ORIGIN` and `CW_SECURE_COOKIES=1`, and protect the persistent data and camera key. Complete first-admin setup before making the service reachable to others.
+
+## Model attribution
+
+The model/runtime use Ultralytics YOLO11 for people, YOLO-World for inventory, and OpenAI CLIP for one-time vocabulary preparation. Check their published licensing before distributing a commercial or closed-source deployment. See the model manifests and vision readiness notes for the actual artifact identities.
